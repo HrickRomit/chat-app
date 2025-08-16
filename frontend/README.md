@@ -1,3 +1,8 @@
+## API configuration
+
+Set `VITE_API_BASE_URL` in `.env` if your backend is not on `http://localhost:5000/api`.
+
+Axios is configured with `withCredentials: true` so HttpOnly cookies are sent to the backend.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

@@ -1,13 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/LoginPage";
+import Register from "./pages/RegisterPage";
+import ChatPage from "./pages/ChatPage";
+ 
 
-export default function App() {
+function App() {
   return (
-    <div className="bg-red-500 text-white p-4">
-      Tailwind is working!
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/chat"
+          element={
+            localStorage.getItem("token") ? (
+              <ChatPage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
+export default App;
