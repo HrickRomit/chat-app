@@ -81,6 +81,15 @@ router.post('/:chatId/messages', authRequired, async (req, res) => {
       content.trim()
     );
 
+    // 🚀 BROADCAST TO ALL USERS IN THE CHAT ROOM
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`chat_${chatId}`).emit('new_message', {
+        chatId: parseInt(chatId),
+        message: message
+      });
+    }
+
     res.status(201).json(message);
   } catch (error) {
     console.error('Error sending message:', error);

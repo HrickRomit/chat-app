@@ -1,18 +1,41 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../hooks/useSocket";
 import api from "../utils/api";
 import MessageInput from "./MessageInput";
 
 export default function ChatWindow({ chatId, otherUser }) {
   const { user } = useAuth();
+  const { joinChat, leaveChat, onNewMessage, offNewMessage } = useSocket();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (chatId) {
       fetchMessages();
+      
+      // Join this chat's room for real-time updates
+      joinChat(chatId);
+      
+      // Listen for new messages
+      onNewMessage((data) => {
+        if (data.chatId === chatId) {
+          setMessages(prev => {
+            // Check if message already exists to prevent duplicates
+            const exists = prev.some(msg => msg.id === data.message.id);
+            if (exists) return prev;
+            return [...prev, data.message];
+          });
+        }
+      });
+
+      // Cleanup when leaving chat
+      return () => {
+        leaveChat(chatId);
+        offNewMessage();
+      };
     }
-  }, [chatId]);
+  }, [chatId]); // Only depend on chatId
 
   const fetchMessages = async () => {
     try {
@@ -32,8 +55,8 @@ export default function ChatWindow({ chatId, otherUser }) {
         content
       });
       
-      // Add the new message to the list
-      setMessages(prev => [...prev, newMessage]);
+      // Don't add message here - let Socket.io handle it
+      // This prevents duplicate messages
     } catch (error) {
       console.error("Failed to send message:", error);
     }
